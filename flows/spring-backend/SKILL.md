@@ -1,11 +1,28 @@
 ---
 name: spring-backend
-description: Build or change modular Spring backends by composing architecture, services, HTTP API, JPA, MapStruct, and testing skills. Use when work spans multiple backend concerns or implements complete backend feature.
+description: Deliver Spring backend features through feature-planning lifecycle, then select architecture, services, HTTP API, JPA, MapStruct, and testing skills. Use for complete Spring backend features or scoped multi-layer changes.
 ---
 
 # Spring Backend Flow
 
 Compose atomic skills. Do not duplicate or override their rules. Load only skills needed by requested feature.
+
+This flow defines Spring implementation layers, order, and skill selection only. It does not own feature clarification, behavior approval, BDD lifecycle, review gates, or conformance review.
+
+## Feature lifecycle
+
+For feature request, load `$feature-planning` first and pass this skill as configured development flow.
+
+Before conceptual approval:
+
+- Follow `$feature-planning` only.
+- Do not inspect repository.
+- Do not load Spring or Java implementation skills.
+- Treat layer order and skill list below as later configuration, not planning evidence.
+
+After `$feature-planning` confirms feasibility and freezes implementation baseline, use affected layers and atomic skills below. Return each completed layer to `$feature-planning` for approval gate. Return final implementation to `$feature-planning` for conformance review.
+
+For explicit scoped technical change without feature behavior planning, select matching atomic skill directly.
 
 ## Select skills
 
@@ -18,19 +35,21 @@ Compose atomic skills. Do not duplicate or override their rules. Load only skill
 
 If requested work touches one concern only, use matching atomic skill directly. Do not force full flow.
 
-## Implement feature
+## Layer order
 
-1. Read request and existing code. Identify module, behavior, inbound boundary, outbound boundaries, and observable result.
-2. Load `$modular-architecture`. Place feature and define contracts before framework implementation.
-3. Implement domain behavior with plain Java. Add domain tests when business rules change.
-4. Implement application use case and ports. Add application tests with fakes and Mockito as appropriate.
-5. Load only adapter skills required by feature:
-   - HTTP: `$spring-api`
-   - persistence: `$spring-data-jpa`
-   - generated mapping: `$mapstruct`
-6. Load `$spring-services` when wiring implementation into Spring.
-7. Load `$spring-testing`. Add focused infrastructure tests for each real adapter. Add full-feature test when change crosses complete feature path.
-8. Run smallest relevant tests first, then broader project verification.
+Use only affected layers:
+
+```text
+architecture and placement
+domain
+application
+outbound infrastructure
+inbound API
+Spring wiring
+cross-layer verification
+```
+
+Configured feature lifecycle decides when each layer starts and stops. This flow supplies matching atomic skill and Spring-specific rules.
 
 ## Feature paths
 
@@ -80,4 +99,4 @@ Add `mapstruct` only when mapping complexity warrants it.
 - Never load every skill by default. Choose from actual change surface.
 - Follow atomic skill when this flow gives no detailed rule.
 - When atomic rules conflict, preserve architecture dependency direction and user instruction; report unresolved conflict.
-- Finish behavior and relevant tests before calling feature complete.
+- Never call feature complete directly. `$feature-planning` owns final conformance decision.

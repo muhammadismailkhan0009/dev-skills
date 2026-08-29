@@ -13,7 +13,7 @@ Each installable directory contains a `SKILL.md` file. Folder name becomes insta
 
 ## Install Spring backend flow from GitHub
 
-The Spring backend flow needs six atomic skills. Run bundled Codex installer from any directory:
+Complete Spring feature lifecycle needs seven atomic skills plus Spring flow. Run bundled Codex installer from any directory:
 
 ```bash
 codex_dir="${CODEX_HOME:-$HOME/.codex}"
@@ -28,6 +28,7 @@ python3 "$installer_dir/scripts/install-skill-from-github.py" \
     backend/java/spring/spring-data-jpa \
     backend/java/spring/testing \
     backend/java/mappers/mapstruct \
+    backend/java/feature-planning \
     flows/spring-backend
 ```
 
@@ -35,7 +36,7 @@ Installer places each directory under `${CODEX_HOME:-$HOME/.codex}/skills`. It s
 
 Use `--ref branch_or_tag` when installing version other than repository default branch. GitHub installation can only use committed and pushed files.
 
-Start new Codex turn after installation. Invoke complete flow with `$spring-backend`, or invoke atomic skill directly.
+Start new Codex turn after installation. Invoke `$spring-backend` for complete feature lifecycle; it delegates lifecycle control to `$feature-planning`. Invoke atomic skill directly for scoped technical work.
 
 ## Install from local clone
 
@@ -51,6 +52,7 @@ cp -R backend/java/spring/spring-api "$skills_dir/"
 cp -R backend/java/spring/spring-data-jpa "$skills_dir/"
 cp -R backend/java/spring/testing "$skills_dir/"
 cp -R backend/java/mappers/mapstruct "$skills_dir/"
+cp -R backend/java/feature-planning "$skills_dir/"
 cp -R flows/spring-backend "$skills_dir/"
 ```
 
@@ -87,6 +89,7 @@ Expected Spring backend skill names:
 - `spring-data-jpa`
 - `spring-testing`
 - `mapstruct`
+- `feature-planning`
 - `spring-backend`
 
 ## Update installed skills
