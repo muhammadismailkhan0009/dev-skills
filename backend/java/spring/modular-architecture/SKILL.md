@@ -13,4 +13,6 @@ Implement in order. Finish implementation and tests for each step before next:
 
 Architecture: `domain`, `application`, `infrastructure`. Dependencies point inward.
 
+Before implementing each layer, check its planned types and dependencies against the onion boundaries. Before presenting that layer for approval, review the resulting dependency boundary again and fix any leaked infrastructure type, outward dependency, or misplaced orchestration.
+
 For modular monoliths, keep configuration in application-level `shared/configuration`, never inside business modules.

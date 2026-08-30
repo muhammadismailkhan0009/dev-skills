@@ -7,6 +7,8 @@ description: Plan and deliver features through behavior approval, targeted feasi
 
 Own complete feature lifecycle. Platform skills define implementation rules only. Configured development flow supplies relevant layers, their order, and available skills.
 
+“Use `$feature-planning` exclusively” means this skill exclusively owns lifecycle orchestration, state, and approval gates. It does not mean implementing through this skill alone: during each approved layer, invoke the implementation, architecture, framework, and testing skills selected by the configured development flow.
+
 ```text
 request
 clarification
@@ -29,6 +31,7 @@ feature complete
 - Never choose classes, files, framework annotations, storage mappings, or tests during conceptual planning.
 - Never implement before feasibility is confirmed and baseline frozen.
 - Keep BDD, orchestration, approval gates, and conformance here. Never push them into language, framework, architecture, adapter, or testing skills.
+- Keep architecture and platform rules out of this skill. Enforce when implementation may proceed; let selected implementation skills define how it proceeds.
 
 ## Run lifecycle
 

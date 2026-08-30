@@ -22,11 +22,13 @@ Before conceptual approval:
 
 After `$feature-planning` confirms feasibility and freezes implementation baseline, use affected layers and atomic skills below. Return each completed layer to `$feature-planning` for approval gate. Return final implementation to `$feature-planning` for conformance review.
 
+For every cross-layer feature, load and apply `$modular-architecture`; it is required, not optional. Before starting each implementation layer, run its architecture and dependency-boundary check against the planned change. Before returning the layer to `$feature-planning` for approval, run the check again against the implementation.
+
 For explicit scoped technical change without feature behavior planning, select matching atomic skill directly.
 
 ## Select skills
 
-- Use `$modular-architecture` for module placement, domain model, application use cases, ports, adapters, and dependency direction.
+- Use `$modular-architecture` for every cross-layer feature and whenever work concerns module placement, domain model, application use cases, ports, adapters, or dependency direction.
 - Use `$spring-services` when adding Spring stereotypes, dependency wiring, bean configuration, or injected values.
 - Use `$spring-api` when feature has HTTP controller, request/response models, validation, status codes, or error responses.
 - Use `$spring-data-jpa` when feature persists data, changes schema, defines JPA mapping, repository, query, projection, transaction, or Flyway migration.
@@ -50,6 +52,8 @@ cross-layer verification
 ```
 
 Configured feature lifecycle decides when each layer starts and stops. This flow supplies matching atomic skill and Spring-specific rules.
+
+At every affected layer: run `$modular-architecture` architecture check, implement with selected atomic skills, then run its dependency-boundary review before layer approval.
 
 ## Feature paths
 
