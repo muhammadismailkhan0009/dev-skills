@@ -8,6 +8,14 @@ Use three test shapes:
 2. Inbound adapter: real controller, listener, or tool with mocked application boundary.
 3. Full feature: real inbound adapter, application, domain, outbound adapter, and real or local dependencies.
 
+Full-feature test is required whenever one feature crosses multiple infrastructure boundaries. This includes paths such as:
+
+```text
+inbound adapter -> application -> persistence adapter -> database
+```
+
+Outbound- and inbound-adapter tests remain useful boundary checks, but their combined presence is insufficient to declare such a feature verified. Feature verification must also exercise complete path through real Spring wiring without internal mocks.
+
 ## Outbound adapter
 
 Start real dependency through Testcontainers or another reproducible local implementation. Wire real adapter to it. Never mock client, repository, serializer, driver, or protocol used by adapter.
@@ -77,6 +85,8 @@ Verify validation, authentication, deserialization, mapping, status or acknowled
 ## Full feature
 
 Start complete Spring context plus all required real/local dependencies. Enter through real inbound transport. Keep application, domain, outbound adapters, database, broker, and local external services real. Do not mock components inside feature path.
+
+Use this shape as mandatory cross-boundary evidence when request expects inbound-to-dependency behavior, including MCP-, HTTP-, message-, or CLI-to-database flows. Do not stop after separate inbound and outbound tests pass.
 
 ```java
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -155,6 +165,7 @@ For reusable static container declarations shared by multiple tests, put them in
 
 - Do not mock outbound dependency in outbound adapter or full-feature tests.
 - Mock only application boundary in inbound adapter tests.
+- Never declare a multi-boundary feature verified without a passing full-feature test covering its complete path.
 - Do not replace production mappings, serializers, clients, migrations, or configuration with test-only alternatives.
 - Do not assert private calls or internal implementation structure.
 - Keep tests deterministic, independent, and runnable in CI.
