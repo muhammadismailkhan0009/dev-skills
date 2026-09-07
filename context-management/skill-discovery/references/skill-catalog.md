@@ -13,6 +13,12 @@ References:
 - `layer-bdd-execution.md` — approved layer-by-layer BDD implementation and gates.
 - `conformance-review.md` — final behavior-to-baseline conformance review.
 
+## $angular-ui
+Build Angular screens and shared UI through composition using Tailwind CSS v4 and spartan/ui. Reuse existing application components first, then installed or newly added Spartan primitives; avoid screen-local reinvention of standard controls and large handcrafted CSS.
+
+References:
+- `spartan-ui.md` — mandatory reuse order, Spartan skill/MCP/CLI discovery, Tailwind styling policy, component boundaries, and completion checks.
+
 ## $mapstruct
 Compile-time Java structural mappings among domain models, persistence entities, commands, and DTOs. Use for mapping configuration and deterministic conversion only; not business logic or external calls.
 
