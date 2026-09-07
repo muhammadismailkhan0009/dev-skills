@@ -13,6 +13,13 @@ References:
 - `layer-bdd-execution.md` — approved layer-by-layer BDD implementation and gates.
 - `conformance-review.md` — final behavior-to-baseline conformance review.
 
+## $angular-architecture
+Structure Angular/Nx frontends by business domain and vertical feature ownership. Use when creating, moving, reviewing, or organizing features, shared code, components, routes, data access, state, or dependency boundaries.
+
+References:
+- `directory-structure.md` — domain/feature layout, feature-root files, `components/`, `data-access/`, `util/`, promotion to domain/global shared, and minimal-folder rules.
+- `dependency-boundaries.md` — allowed feature/domain/shared dependency direction, feature isolation, cross-domain contracts, type ownership, and enforceable Nx boundaries.
+
 ## $angular-ui
 Build Angular screens and shared UI through composition using Tailwind CSS v4 and spartan/ui. Reuse existing application components first, then installed or newly added Spartan primitives; avoid screen-local reinvention of standard controls and large handcrafted CSS.
 
