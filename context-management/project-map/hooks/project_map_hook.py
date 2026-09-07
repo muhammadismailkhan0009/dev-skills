@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 MAP_NAME = ".project-map.md"
+RUNTIME_NAME = "project_map_runtime.md"
 STATE_DIR_NAME = "codex-project-map-hook"
 
 
@@ -46,31 +47,42 @@ def emit(obj):
     sys.stdout.write("\n")
 
 
+def read_text(path):
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
 def user_prompt_submit(data, root):
+    runtime_path = root / ".codex" / "hooks" / RUNTIME_NAME
     map_path = root / MAP_NAME
-    if map_path.exists():
-        try:
-            content = map_path.read_text(encoding="utf-8")
-        except Exception:
-            return
-        context = (
-            "PROJECT MAP PREFLIGHT (hook-enforced)\n"
-            "The current repository project map is injected below. Use it for routing before broad repository exploration. "
-            "Current source remains authoritative. Do not maintain the map during the primary requested work. "
-            "After repository work is complete, end-of-turn reconciliation is mandatory when source was inspected, searched, analyzed, or modified.\n\n"
-            + content
-        )
+
+    runtime = read_text(runtime_path)
+    project_map = read_text(map_path)
+
+    parts = []
+    if runtime:
+        parts.append("PROJECT MAP RUNTIME (hook-enforced)\n" + runtime)
     else:
-        context = (
-            "PROJECT MAP PREFLIGHT (hook-enforced)\n"
-            "No .project-map.md exists at the repository root. Before broad repository exploration, bootstrap it using the installed $project-map skill, "
-            "then perform the requested work. Keep bootstrap sparse and source-authoritative."
+        parts.append(
+            "PROJECT MAP RUNTIME MISSING\n"
+            "The installed project-map runtime reference is missing or unreadable. Use the installed $project-map skill and its installation reference to repair project-map infrastructure before broad repository exploration."
         )
+
+    if project_map is not None:
+        parts.append("CURRENT PROJECT MAP\n" + project_map)
+    else:
+        parts.append(
+            "CURRENT PROJECT MAP MISSING\n"
+            "No .project-map.md exists at the repository root. Bootstrap it sparsely using the installed $project-map installation reference before broad repository exploration."
+        )
+
     emit(
         {
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",
-                "additionalContext": context,
+                "additionalContext": "\n\n".join(parts),
             }
         }
     )
@@ -105,12 +117,7 @@ def stop(data, root):
         {
             "decision": "block",
             "reason": (
-                "The primary requested work is complete. Before returning the final response, perform the mandatory $project-map end-of-turn reconciliation now. "
-                "Reconcile the whole logical .project-map.md using all durable navigation knowledge learned from every repository file/search/tool result encountered this turn, "
-                "regardless of whether it belongs to the requested feature. Do not perform extra repository exploration solely for the map. "
-                "Apply the project-map admission, compression, pruning, and stale-entry rules. Routes must reference physical files with filename extensions; "
-                "use bare File.ext by default and only the shortest disambiguating path when necessary. Rewrite the map only if its reconciled content changes. "
-                "After reconciliation, return the user's final response."
+                "The primary requested work is complete. Before returning the final response, perform the mandatory project-map end-of-turn reconciliation now using the injected PROJECT MAP RUNTIME rules and all durable repository knowledge learned this turn. Do not perform extra repository exploration solely for the map. Rewrite .project-map.md only if its reconciled content changes, then return the user's final response."
             ),
         }
     )
