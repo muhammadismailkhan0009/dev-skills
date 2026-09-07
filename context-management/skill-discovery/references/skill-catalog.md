@@ -40,6 +40,12 @@ References:
 ## $spring-services
 Spring-managed application/infrastructure services: stereotypes, constructor injection, bean registration, configuration properties/values, qualifiers, and dependency wiring.
 
+## $spring-logging
+Minimize Spring test output for LLM-driven development by suppressing framework, persistence, container, pool, migration, banner, SQL, and debug noise while retaining actual test failure evidence. The complete test suppression baseline is mandatory whenever Spring tests are configured or run.
+
+References:
+- `test-logging.md` — mandatory Spring Boot, JPA/Hibernate, `logback-test.xml`, and Maven Surefire test-log suppression baseline plus narrow temporary diagnostic logging rules.
+
 ## $spring-testing
 Spring Java backend testing by architectural boundary: domain behavior, application/use-case orchestration, Spring wiring, persistence, messaging, HTTP, and cross-layer infrastructure verification.
 
