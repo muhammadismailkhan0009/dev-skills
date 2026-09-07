@@ -1,6 +1,6 @@
 ---
 name: project-map
-description: Use at the start of every repository development task, before any other development skill or broad code exploration. Maintain and consult a tiny repo-local `.project-map.md` that routes concepts to files, ownership, flows, and invariants; automatically bootstrap it when absent, update it reactively as durable navigation knowledge changes, and aggressively reconcile/prune it before substantive task completion.
+description: Use at the start of every repository development task, before any other development skill or broad code exploration. Maintain and consult a tiny repo-local `.project-map.md` that routes concepts to files, ownership, flows, and invariants; automatically bootstrap it when absent, update it reactively as durable navigation knowledge changes, learn from map misses, and aggressively reconcile/prune it before substantive task completion.
 ---
 
 # Project Map
@@ -107,15 +107,84 @@ Usually reject:
 
 For every candidate line ask: **What future repository search or read is this expected to prevent?** If there is no concrete answer, omit it.
 
+### Admission scoring
+
+Use this internal score when value is unclear. Do not write scores into `.project-map.md`.
+
+- +3 directly routes a likely future task to source.
+- +2 identifies non-obvious behavioral ownership.
+- +2 can avoid tracing/searching multiple files.
+- +1 identifies a non-obvious source of truth or architectural boundary.
+- +1 is likely to recur across future work.
+- -2 is obvious from the filename/directory name.
+- -2 is recoverable with one cheap, narrow search.
+- -3 is task-specific, transient, or historical.
+- -3 substantially duplicates an existing entry.
+- -4 needs verbose explanation to be useful.
+
+Normally admit only candidates scoring **>= 2**. Prefer the highest-value compressed statement when several candidates encode the same routing knowledge.
+
+## Learn from map misses
+
+A **map miss** occurs when preflight cannot route the task sufficiently and the agent must use fallback repository exploration to discover where relevant behavior lives.
+
+After a fallback search/read sequence yields useful structure, ask:
+
+1. What navigation question was the fallback trying to answer?
+2. Did the map lack a route, ownership fact, flow, invariant, or source-of-truth pointer?
+3. What is the smallest verified entry that would likely have avoided the same fallback next time?
+4. Does that entry pass the admission policy and score?
+
+If yes, update the map at that knowledge boundary. Do not record the search transcript or every discovered file.
+
+Classify misses mentally when useful:
+
+- **Route miss:** concept/task language did not point to the right source.
+- **Ownership miss:** area was known but behavior-owning file was unclear.
+- **Flow miss:** one file was known but important cross-file traversal still had to be rediscovered.
+- **Stale-map miss:** an existing route/ownership/flow no longer matched source.
+- **Novel exploration:** genuinely new knowledge with little expected reuse; usually do not store it.
+
+The goal is for repeated work to pay progressively less repository-rediscovery cost.
+
+## Compression by ownership
+
+Prefer dense behavioral ownership over multiple descriptive facts.
+
+Collapse facts such as:
+
+```text
+AuthenticationService.java handles login
+AuthenticationService.java handles logout
+AuthenticationService.java coordinates refresh tokens
+```
+
+into:
+
+```text
+`AuthenticationService.java` — login/logout/refresh orchestration
+```
+
+Rules:
+
+- Group closely related responsibilities owned by the same file into one terse line.
+- Keep distinctions only when they route future tasks differently.
+- Prefer `File.ext — ownership` over sentences explaining implementation.
+- Prefer one route to a behavior-owning file over lists of adjacent files.
+- Keep a flow only when its sequence itself prevents future tracing.
+- If a route and ownership line duplicate each other, keep both only when the route adds useful user-language aliases or traversal order.
+
+Compression must preserve retrieval value, not prose completeness.
+
 ## Completion reconciliation and aggressive pruning
 
 Before the final response for any substantive repository task, feature, bug fix, or refactor, reconcile `.project-map.md` if it exists. This is the mandatory end-of-task maintenance point.
 
 1. Reconcile entries touched by knowledge or code changes in the current task.
-2. Add any high-value durable routes/ownership/flows/invariants learned but not yet recorded.
+2. Add any high-value durable routes/ownership/flows/invariants learned but not yet recorded, including useful map-miss lessons.
 3. Remove or replace stale entries invalidated by current source.
-4. Merge duplicate or overlapping entries.
-5. Remove low-value facts that do not clearly prevent future exploration.
+4. Merge duplicate or overlapping entries, especially multiple facts that can become one ownership statement.
+5. Remove low-value facts that do not clearly prevent future exploration or no longer pass admission scoring.
 6. Compress wording while preserving routing information.
 7. If the map exceeds 8 KiB, prune aggressively toward the target. Never allow it past 12 KiB without explicit user preference.
 
