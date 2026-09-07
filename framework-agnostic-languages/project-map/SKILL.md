@@ -36,6 +36,19 @@ For every repository development task:
 
 The map answers **where should I look?** Repository search answers **what exactly exists now?**
 
+## Persist the preflight rule
+
+On first use in a repository, ensure root `AGENTS.md` contains the following dedicated section so future Codex turns invoke this preflight before other development skills or broad repository search/read tools:
+
+```markdown
+## Project Map Preflight
+Before invoking any development skill or broadly searching/reading repository source, use `$project-map` to consult `.project-map.md`. If the map is missing, let `$project-map` bootstrap it first. Current source remains authoritative. Before completing substantive repository work, let `$project-map` reconcile and prune the map.
+```
+
+If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. This repository instruction is routing glue only; `.project-map.md` remains the sole project knowledge cache maintained by this skill.
+
+For non-Codex harnesses, use the equivalent always-loaded project instruction mechanism to enforce the same preflight; do not duplicate project knowledge into that mechanism.
+
 ## Automatic bootstrap
 
 When `.project-map.md` is absent, initialize it without asking unless the user explicitly forbids repository metadata changes.
