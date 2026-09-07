@@ -17,7 +17,7 @@ The map is a routing cache, not documentation, history, task memory, or source o
 - Current source is authoritative. Before editing code, read the actual target files even when the map names them.
 - Never recursively scan or broadly read the repository merely to enrich or validate the map.
 - Record only verified facts supported by current project evidence. Omit uncertainty rather than storing guesses.
-- Use repo-relative paths. Every file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`; directory references end in `/`.
+- Every file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`. Default to the bare filename. Add only the shortest path needed when the filename is ambiguous in the repository or when path context materially improves routing. Do not repeat long physical paths when a filename or short disambiguating path is sufficient. Directory references end in `/`.
 - Avoid line numbers, copied code, method bodies, large signatures, raw command output, and exhaustive symbol/file lists.
 - The map is rewritten knowledge, never an append-only log. Replace stale facts, merge duplicates, and delete low-value entries.
 - Never store secrets, credentials, tokens, sensitive values, or private data.
@@ -92,7 +92,7 @@ High-value entries are:
 - **Boundary/invariant:** non-obvious architectural rule that changes where future work belongs.
 - **Source of truth:** file that definitively owns a schema/configuration/contract when that fact prevents repeated hunting.
 
-Be reasonably aggressive about file-level ownership for behavior-owning/routing-important files, but do not summarize every file. File names must include extensions.
+Be reasonably aggressive about file-level ownership for behavior-owning/routing-important files, but do not summarize every file. File references must include extensions. Prefer `File.ext`; add a short path only when needed to disambiguate or when that path itself carries useful routing information.
 
 Usually reject:
 
@@ -168,7 +168,7 @@ Rules:
 
 - Group closely related responsibilities owned by the same file into one terse line.
 - Keep distinctions only when they route future tasks differently.
-- Prefer `File.ext — ownership` over sentences explaining implementation.
+- Prefer `File.ext — ownership` over sentences explaining implementation. If duplicate filenames make that ambiguous, use the shortest disambiguating path, e.g. `authentication/TokenService.java`, not the full physical path by default.
 - Prefer one route to a behavior-owning file over lists of adjacent files.
 - Keep a flow only when its sequence itself prevents future tracing.
 - If a route and ownership line duplicate each other, keep both only when the route adds useful user-language aliases or traversal order.
@@ -189,7 +189,7 @@ Perform a whole-map logical rewrite using the existing map plus only evidence le
 4. Reconcile moves, renames, splits, merges, and responsibility changes caused or discovered this turn.
 5. Merge duplicate/overlapping entries, especially facts that can become one ownership statement.
 6. Remove low-value entries that no longer pass admission scoring.
-7. Compress wording aggressively while preserving routing value.
+7. Compress wording aggressively while preserving routing value, including shortening file paths to the minimum unambiguous form.
 8. Enforce the size budget; prune toward <= 8 KiB and never exceed 12 KiB without explicit user preference.
 9. Rewrite `.project-map.md` with the reconciled representation. If reconciliation produces byte-for-byte equivalent content, do not force a meaningless no-op write.
 
