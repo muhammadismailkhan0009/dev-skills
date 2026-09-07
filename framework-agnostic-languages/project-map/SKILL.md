@@ -1,6 +1,6 @@
 ---
 name: project-map
-description: Use at the start of every repository development task, before any other development skill or broad code exploration. Consult a tiny repo-local `.project-map.md` for navigation, bootstrap it automatically when absent, and after the requested repository work is complete reconcile and aggressively rewrite/prune the map before the final response.
+description: Use at the start of every repository development task. Maintain one tiny repo-local `.project-map.md`; Codex project hooks inject it before work and force end-of-turn reconciliation after repository activity, while this skill defines bootstrap, admission, compression, and pruning behavior.
 ---
 
 # Project Map
@@ -12,16 +12,83 @@ The map is a routing cache, not documentation, history, task memory, or source o
 ## Hard boundaries
 
 - Keep exactly one `.project-map.md`. Do not create indexes, databases, per-module memory files, changelogs, task files, or generated knowledge stores.
-- Consult `.project-map.md` before invoking other development skills or broadly exploring source.
+- Consult the injected/current `.project-map.md` before invoking other development skills or broadly exploring source.
 - Except for first-time bootstrap when the file is missing, do not maintain/rewrite the map before or during the primary requested work. Finish the user's requested repository work first; reconcile the map afterward.
 - Current source is authoritative. Before editing code, read the actual target files even when the map names them.
 - Never recursively scan or broadly read the repository merely to enrich or validate the map.
 - Record only verified facts supported by current project evidence. Omit uncertainty rather than storing guesses.
-- Every file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`. Default to the bare filename. Add only the shortest path needed when the filename is ambiguous in the repository or when path context materially improves routing. Do not repeat long physical paths when a filename or short disambiguating path is sufficient. Directory references end in `/`.
+- Every physical file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`. Default to the bare filename. Add only the shortest path needed when the filename is ambiguous in the repository or when path context materially improves routing. Do not repeat long physical paths when a filename or short disambiguating path is sufficient. Directory references end in `/`.
+- Routes point to physical files or directories, not bare class/interface/method symbols.
 - Avoid line numbers, copied code, method bodies, large signatures, raw command output, and exhaustive symbol/file lists.
 - The map is rewritten knowledge, never an append-only log. Replace stale facts, merge duplicates, and delete low-value entries.
 - Never store secrets, credentials, tokens, sensitive values, or private data.
 - Target <= 8 KiB. Prune aggressively above 8 KiB; never exceed 12 KiB without explicit user preference.
+
+## Codex lifecycle hook: primary enforcement
+
+For Codex, project hooks are the primary lifecycle mechanism. `AGENTS.md` is only a fallback instruction layer.
+
+On first bootstrap, and whenever project-map hook files/config are missing or stale:
+
+1. Ensure `<repo>/.codex/hooks/` exists.
+2. Copy the installed skill asset `${CODEX_HOME:-$HOME/.codex}/skills/project-map/hooks/project_map_hook.py` to `<repo>/.codex/hooks/project_map_hook.py`, replacing only that project-map-owned file when its content differs.
+3. Ensure `<repo>/.codex/hooks.json` contains exactly one project-map handler for each of `UserPromptSubmit`, `PostToolUse`, and `Stop` using the canonical handlers below.
+4. If `hooks.json` already exists, merge/repair only the project-map handlers. Preserve all unrelated hook events, matcher groups, handlers, metadata, and user/project configuration. Never replace the whole file merely to install project-map.
+5. Do not duplicate project-map handlers on repeated bootstrap/update.
+6. New or changed project hooks require Codex trust review. Do not claim they are active until trusted; tell the user to review/trust them with `/hooks` when needed.
+
+Canonical project-map handlers:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/project_map_hook.py\"",
+            "timeout": 5,
+            "additionalContextLimit": 4000,
+            "statusMessage": "Loading project map"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/project_map_hook.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/project_map_hook.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The hook lifecycle is:
+
+- `UserPromptSubmit`: inject the current `.project-map.md` into developer context so preflight does not depend on the model choosing to read it.
+- `PostToolUse`: mark that repository/local tool activity occurred during the turn. The hook ignores planning/agent-management-only tools.
+- `Stop`: after primary work, force one continuation that applies this skill's end-of-turn reconciliation rules. `stop_hook_active` prevents a reconciliation loop.
+
+The hook must not reason about or rewrite project knowledge itself. It only guarantees lifecycle/context; this skill owns map quality rules.
 
 ## Mandatory preflight
 
@@ -29,7 +96,7 @@ For every repository development task:
 
 1. Resolve the repository root.
 2. If `.project-map.md` does not exist, bootstrap it automatically before invoking another development skill or broadly exploring source.
-3. Consult `.project-map.md` first. Search it with a few task/domain terms when that is cheaper than reading the whole file; read the whole file when already tiny.
+3. Use the hook-injected map first when available. If hooks are unavailable/untrusted, consult `.project-map.md` directly.
 4. Use mapped routes, ownership, flows, and invariants to choose the smallest plausible source shortlist.
 5. Perform the user's requested work normally using current source as authority.
 6. Fall back to repository `rg`/find/listing/reference searches only when the map is insufficient, stale, or exact usages/callers are required.
@@ -38,18 +105,18 @@ For every repository development task:
 
 The map answers **where should I look?** Repository search answers **what exactly exists now?**
 
-## Persist the preflight rule
+## Persist fallback instructions
 
-On first use in a repository, ensure root `AGENTS.md` contains the following dedicated section so future Codex turns use this lifecycle:
+Ensure root `AGENTS.md` contains the following dedicated fallback section. Hooks are stronger and should be used when trusted, but this keeps the lifecycle understandable and provides a fallback when hooks are unavailable:
 
 ```markdown
 ## Project Map Preflight
-Before invoking any development skill or broadly searching/reading repository source, use `$project-map` to consult `.project-map.md`. If the map is missing, let `$project-map` bootstrap it first. Current source remains authoritative. Complete the requested repository work before maintaining the map. After the requested work is done and before the final response, use `$project-map` to reconcile, rewrite, and aggressively prune `.project-map.md` from knowledge learned in that turn.
+Use the project-map lifecycle for repository work. Prefer the trusted project-local Codex hooks when available; otherwise consult `$project-map` / `.project-map.md` before broad repository exploration. Current source remains authoritative. Complete the requested repository work before maintaining the map. After repository work is done and before the final response, reconcile and aggressively prune `.project-map.md` from durable navigation knowledge learned across the whole turn.
 ```
 
-If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. This repository instruction is routing glue only; `.project-map.md` remains the sole project knowledge cache maintained by this skill.
+If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. `.project-map.md` remains the sole project knowledge cache.
 
-For non-Codex harnesses, use the equivalent always-loaded project instruction mechanism to enforce the same preflight/end-of-turn lifecycle; do not duplicate project knowledge into that mechanism.
+For non-Codex harnesses, use the equivalent lifecycle mechanism if one exists; otherwise rely on the always-loaded project instruction layer. Do not duplicate project knowledge into those mechanisms.
 
 ## Automatic bootstrap
 
@@ -62,7 +129,7 @@ Use only cheap evidence already available or cheap to obtain:
 - top-level directories and at most a shallow directory listing;
 - source files that must already be inspected for the current task.
 
-Do not recursively inspect source to make the first map comprehensive. Create a sparse, correct `.project-map.md`, continue the requested task, and let subsequent turns enrich it.
+Do not recursively inspect source to make the first map comprehensive. Create a sparse, correct `.project-map.md`, install/repair the Codex project hook and fallback `AGENTS.md` section, continue the requested task, and let subsequent turns enrich the map.
 
 A sparse correct map is better than an expensive complete map.
 
@@ -70,11 +137,12 @@ Bootstrap is the only map write allowed before the primary requested work becaus
 
 ## During the requested work: observe, do not maintain
 
-While analyzing, coding, debugging, testing, or otherwise performing the user's requested repository work:
+While analyzing, coding, debugging, testing, reviewing, or otherwise performing the user's requested repository work:
 
 - use the map for navigation;
 - trust current source over map contents;
 - note useful navigation facts, map misses, stale entries, ownership discoveries, flows, invariants, moves/renames, and source-of-truth files as they become evident;
+- treat all repository evidence encountered during the turn as eligible, regardless of whether it belongs to the requested feature or changed files;
 - do not interrupt the primary task merely to update `.project-map.md`;
 - do not run extra searches solely to improve the map.
 
@@ -86,7 +154,7 @@ Admit an entry only if it is likely to prevent a future repository search or unn
 
 High-value entries are:
 
-- **Route:** task/concept -> best file, symbol, or area to inspect first.
+- **Route:** task/concept -> best physical file(s) or area to inspect first.
 - **Ownership:** behavior-owning file/module -> responsibility it actually owns.
 - **Flow:** important cross-file execution/data path needed to navigate a feature.
 - **Boundary/invariant:** non-obvious architectural rule that changes where future work belongs.
@@ -181,9 +249,9 @@ After the user's requested repository work for the current prompt is complete, b
 
 This is maintenance **after the work**, never a prerequisite that interrupts the work.
 
-Perform a whole-map logical rewrite using the existing map plus only evidence learned during the completed turn:
+Perform a whole-map logical rewrite using the existing map plus all durable repository evidence learned during the completed turn, regardless of feature/task boundary:
 
-1. Incorporate high-value durable routes, ownership, flows, invariants, and source-of-truth facts learned this turn.
+1. Incorporate high-value durable routes, ownership, flows, invariants, and source-of-truth facts learned anywhere in the repository this turn.
 2. Incorporate useful map-miss lessons.
 3. Correct or remove entries contradicted by source inspected this turn.
 4. Reconcile moves, renames, splits, merges, and responsibility changes caused or discovered this turn.
@@ -195,7 +263,7 @@ Perform a whole-map logical rewrite using the existing map plus only evidence le
 
 Do not perform a repository-wide validation scan at end of turn. Reconcile only from the existing map and source/search/change evidence already encountered while doing the requested work. Untouched entries remain unless current evidence contradicts them.
 
-For repository-working prompts, perform this reconciliation on every response, not only when an entire feature is complete. This keeps partially implemented features and evolving architecture reflected in the next prompt's preflight map.
+For repository-working prompts, perform this reconciliation on every response, not only when an entire feature is complete. Analysis-only prompts, repository questions, code review, explicitly requested file analysis, debugging, and implementation all count when repository source was actually inspected/searched/analyzed/modified.
 
 If the prompt did not inspect, search, analyze, or modify repository source, no map reconciliation is required.
 
@@ -220,7 +288,7 @@ Use only useful sections; omit empty ones.
 - `<OtherOwner.ext>` — <owned behavior/responsibility>
 
 ## Routes
-- <task/concept> -> `<FirstFile.ext>` (`OptionalSymbol`) -> `<NextFile.ext>`
+- <task/concept> -> `<FirstFile.ext>` -> `<NextFile.ext>`
 
 ## Flows
 - <flow>: `<A.ext>` -> `<B.ext>` -> `<C.ext>`
