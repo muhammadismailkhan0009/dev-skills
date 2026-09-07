@@ -7,6 +7,7 @@ This repository contains atomic development skills and installable flows for Cod
 - `backend/`: backend skills grouped by language and framework
 - `frontend/`: frontend skills
 - `framework-agnostic-languages/`: language skills without framework coupling
+- `context-management/`: repository context, memory, and agent lifecycle skills
 - `flows/`: workflows that compose atomic skills
 
 Each installable directory contains a `SKILL.md` file. Folder name becomes installed skill name.
