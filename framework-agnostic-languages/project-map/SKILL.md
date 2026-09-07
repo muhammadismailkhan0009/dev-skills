@@ -1,6 +1,6 @@
 ---
 name: project-map
-description: Use at the start of every repository development task, before any other development skill or broad code exploration. Maintain and consult a tiny repo-local `.project-map.md` that routes concepts to files, ownership, flows, and invariants; automatically bootstrap it when absent, update it reactively as durable navigation knowledge changes, learn from map misses, and aggressively reconcile/prune it before substantive task completion.
+description: Use at the start of every repository development task, before any other development skill or broad code exploration. Consult a tiny repo-local `.project-map.md` for navigation, bootstrap it automatically when absent, and after the requested repository work is complete reconcile and aggressively rewrite/prune the map before the final response.
 ---
 
 # Project Map
@@ -13,14 +13,15 @@ The map is a routing cache, not documentation, history, task memory, or source o
 
 - Keep exactly one `.project-map.md`. Do not create indexes, databases, per-module memory files, changelogs, task files, or generated knowledge stores.
 - Consult `.project-map.md` before invoking other development skills or broadly exploring source.
+- Except for first-time bootstrap when the file is missing, do not maintain/rewrite the map before or during the primary requested work. Finish the user's requested repository work first; reconcile the map afterward.
 - Current source is authoritative. Before editing code, read the actual target files even when the map names them.
-- Never recursively scan or broadly read the repository merely to enrich the map.
+- Never recursively scan or broadly read the repository merely to enrich or validate the map.
 - Record only verified facts supported by current project evidence. Omit uncertainty rather than storing guesses.
 - Use repo-relative paths. Every file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`; directory references end in `/`.
 - Avoid line numbers, copied code, method bodies, large signatures, raw command output, and exhaustive symbol/file lists.
 - The map is rewritten knowledge, never an append-only log. Replace stale facts, merge duplicates, and delete low-value entries.
 - Never store secrets, credentials, tokens, sensitive values, or private data.
-- Target <= 8 KiB. Compact before 12 KiB; exceed that only when the user explicitly prefers coverage over token cost.
+- Target <= 8 KiB. Prune aggressively above 8 KiB; never exceed 12 KiB without explicit user preference.
 
 ## Mandatory preflight
 
@@ -30,24 +31,25 @@ For every repository development task:
 2. If `.project-map.md` does not exist, bootstrap it automatically before invoking another development skill or broadly exploring source.
 3. Consult `.project-map.md` first. Search it with a few task/domain terms when that is cheaper than reading the whole file; read the whole file when already tiny.
 4. Use mapped routes, ownership, flows, and invariants to choose the smallest plausible source shortlist.
-5. Inspect current source for the candidates that matter.
+5. Perform the user's requested work normally using current source as authority.
 6. Fall back to repository `rg`/find/listing/reference searches only when the map is insufficient, stale, or exact usages/callers are required.
 7. Keep fallback search narrow. Do not read unrelated matches merely to understand the repository generally.
+8. Do not rewrite the map yet. Retain useful navigation knowledge learned during the work for end-of-turn reconciliation.
 
 The map answers **where should I look?** Repository search answers **what exactly exists now?**
 
 ## Persist the preflight rule
 
-On first use in a repository, ensure root `AGENTS.md` contains the following dedicated section so future Codex turns invoke this preflight before other development skills or broad repository search/read tools:
+On first use in a repository, ensure root `AGENTS.md` contains the following dedicated section so future Codex turns use this lifecycle:
 
 ```markdown
 ## Project Map Preflight
-Before invoking any development skill or broadly searching/reading repository source, use `$project-map` to consult `.project-map.md`. If the map is missing, let `$project-map` bootstrap it first. Current source remains authoritative. Before completing substantive repository work, let `$project-map` reconcile and prune the map.
+Before invoking any development skill or broadly searching/reading repository source, use `$project-map` to consult `.project-map.md`. If the map is missing, let `$project-map` bootstrap it first. Current source remains authoritative. Complete the requested repository work before maintaining the map. After the requested work is done and before the final response, use `$project-map` to reconcile, rewrite, and aggressively prune `.project-map.md` from knowledge learned in that turn.
 ```
 
 If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. This repository instruction is routing glue only; `.project-map.md` remains the sole project knowledge cache maintained by this skill.
 
-For non-Codex harnesses, use the equivalent always-loaded project instruction mechanism to enforce the same preflight; do not duplicate project knowledge into that mechanism.
+For non-Codex harnesses, use the equivalent always-loaded project instruction mechanism to enforce the same preflight/end-of-turn lifecycle; do not duplicate project knowledge into that mechanism.
 
 ## Automatic bootstrap
 
@@ -60,26 +62,23 @@ Use only cheap evidence already available or cheap to obtain:
 - top-level directories and at most a shallow directory listing;
 - source files that must already be inspected for the current task.
 
-Do not recursively inspect source to make the first map comprehensive. Create a sparse, correct `.project-map.md`, continue the requested task, and let real work enrich it.
+Do not recursively inspect source to make the first map comprehensive. Create a sparse, correct `.project-map.md`, continue the requested task, and let subsequent turns enrich it.
 
 A sparse correct map is better than an expensive complete map.
 
-## Reactive maintenance
+Bootstrap is the only map write allowed before the primary requested work because the map must exist to serve as preflight navigation.
 
-Maintain the map during substantive work whenever current source establishes or changes a high-value navigation fact. Do not wait for the end if continuing the task with stale routing could cause wrong or redundant exploration.
+## During the requested work: observe, do not maintain
 
-Update at natural knowledge/change boundaries, not after every read. Typical triggers:
+While analyzing, coding, debugging, testing, or otherwise performing the user's requested repository work:
 
-- a file is confirmed to own a behavior or architectural responsibility;
-- a better route to a recurring concept is discovered;
-- an important cross-file flow becomes clear;
-- a non-obvious boundary/invariant is verified;
-- a source-of-truth file is identified;
-- implementation moves, renames, splits, merges, or changes an existing mapped responsibility/flow.
+- use the map for navigation;
+- trust current source over map contents;
+- note useful navigation facts, map misses, stale entries, ownership discoveries, flows, invariants, moves/renames, and source-of-truth files as they become evident;
+- do not interrupt the primary task merely to update `.project-map.md`;
+- do not run extra searches solely to improve the map.
 
-Reuse evidence already inspected for the task. Never launch a new discovery pass solely to improve the map.
-
-Prefer targeted replacement/merge over append. If new knowledge supersedes an existing entry, rewrite the old entry immediately.
+If the map is stale during the task, route using current source and remember the correction for the end-of-turn rewrite.
 
 ## Admission policy
 
@@ -126,16 +125,16 @@ Normally admit only candidates scoring **>= 2**. Prefer the highest-value compre
 
 ## Learn from map misses
 
-A **map miss** occurs when preflight cannot route the task sufficiently and the agent must use fallback repository exploration to discover where relevant behavior lives.
+A **map miss** occurs when preflight cannot route the task sufficiently and fallback repository exploration is required to discover where relevant behavior lives.
 
-After a fallback search/read sequence yields useful structure, ask:
+During the primary task, do not stop to maintain the map. At end-of-turn reconciliation, for each meaningful fallback sequence ask:
 
 1. What navigation question was the fallback trying to answer?
 2. Did the map lack a route, ownership fact, flow, invariant, or source-of-truth pointer?
 3. What is the smallest verified entry that would likely have avoided the same fallback next time?
 4. Does that entry pass the admission policy and score?
 
-If yes, update the map at that knowledge boundary. Do not record the search transcript or every discovered file.
+If yes, include it in the end-of-turn rewrite. Do not record the search transcript or every discovered file.
 
 Classify misses mentally when useful:
 
@@ -176,21 +175,29 @@ Rules:
 
 Compression must preserve retrieval value, not prose completeness.
 
-## Completion reconciliation and aggressive pruning
+## Mandatory end-of-turn reconciliation and rewrite
 
-Before the final response for any substantive repository task, feature, bug fix, or refactor, reconcile `.project-map.md` if it exists. This is the mandatory end-of-task maintenance point.
+After the user's requested repository work for the current prompt is complete, but before sending the final response, reconcile `.project-map.md` for that turn whenever repository source was inspected, searched, analyzed, or modified.
 
-1. Reconcile entries touched by knowledge or code changes in the current task.
-2. Add any high-value durable routes/ownership/flows/invariants learned but not yet recorded, including useful map-miss lessons.
-3. Remove or replace stale entries invalidated by current source.
-4. Merge duplicate or overlapping entries, especially multiple facts that can become one ownership statement.
-5. Remove low-value facts that do not clearly prevent future exploration or no longer pass admission scoring.
-6. Compress wording while preserving routing information.
-7. If the map exceeds 8 KiB, prune aggressively toward the target. Never allow it past 12 KiB without explicit user preference.
+This is maintenance **after the work**, never a prerequisite that interrupts the work.
 
-Do not perform a repository-wide validation scan at completion. Reconcile from source and changes already inspected during the task. If an untouched map entry might be stale but was not verified, leave it unless current evidence contradicts it.
+Perform a whole-map logical rewrite using the existing map plus only evidence learned during the completed turn:
 
-Also prune immediately when the file crosses the size budget or obvious duplication/staleness is encountered mid-task.
+1. Incorporate high-value durable routes, ownership, flows, invariants, and source-of-truth facts learned this turn.
+2. Incorporate useful map-miss lessons.
+3. Correct or remove entries contradicted by source inspected this turn.
+4. Reconcile moves, renames, splits, merges, and responsibility changes caused or discovered this turn.
+5. Merge duplicate/overlapping entries, especially facts that can become one ownership statement.
+6. Remove low-value entries that no longer pass admission scoring.
+7. Compress wording aggressively while preserving routing value.
+8. Enforce the size budget; prune toward <= 8 KiB and never exceed 12 KiB without explicit user preference.
+9. Rewrite `.project-map.md` with the reconciled representation. If reconciliation produces byte-for-byte equivalent content, do not force a meaningless no-op write.
+
+Do not perform a repository-wide validation scan at end of turn. Reconcile only from the existing map and source/search/change evidence already encountered while doing the requested work. Untouched entries remain unless current evidence contradicts them.
+
+For repository-working prompts, perform this reconciliation on every response, not only when an entire feature is complete. This keeps partially implemented features and evolving architecture reflected in the next prompt's preflight map.
+
+If the prompt did not inspect, search, analyze, or modify repository source, no map reconciliation is required.
 
 ## File format
 
