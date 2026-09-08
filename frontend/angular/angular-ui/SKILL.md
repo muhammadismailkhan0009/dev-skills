@@ -7,6 +7,8 @@ description: Build Angular UI with reusable application components, Tailwind CSS
 
 Build Angular screens by composition, not by recreating UI primitives inside each feature.
 
+Resolve the actual frontend application root before installing, generating, or locating UI code. Angular/Spartan commands and generated components belong to that frontend application, not to an unrelated repository root. Use `$angular-architecture` for ownership and physical placement.
+
 For Angular UI work, read [Spartan UI rules](references/spartan-ui.md). The project UI stack is Angular + Tailwind CSS v4 + spartan/ui. Use the official `$spartan` agent skill and Spartan MCP/CLI for current component knowledge when available; do not duplicate or guess Spartan APIs here.
 
 Reuse in this order:
