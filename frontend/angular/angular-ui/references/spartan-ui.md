@@ -14,17 +14,20 @@ Use:
 
 Spartan owns component/API knowledge. This skill owns project-level reuse and composition policy. Do not copy Spartan component documentation into this repository skill.
 
+All setup, inspection, generation, and component placement must be scoped to the actual frontend application root. In a repository that also contains backend or other applications, do not run Angular/Spartan initialization from the repository root unless that repository root is itself the frontend workspace.
+
 ## Mandatory UI workflow
 
 Before creating or styling feature UI:
 
-1. Inspect existing application shared/composed UI that could satisfy the requirement.
-2. Inspect the current Spartan project state. When available, use the official `spartan` skill and its read-only project inspection command (`@spartan-ng/cli:info --json`) rather than guessing installed components, versions, paths, or APIs.
-3. Prefer an existing application component when it already expresses the application-level responsibility.
-4. Otherwise prefer an already-installed Spartan Helm component.
-5. If the required standard primitive exists in Spartan but is not installed, add it through the official Spartan CLI instead of reimplementing it.
-6. Create a new application shared/composed component only when the behavior or visual composition is application-specific and likely to recur.
-7. Keep markup local to a feature only when it is genuinely one-off composition.
+1. Resolve the actual frontend application root.
+2. Inspect existing application shared/composed UI that could satisfy the requirement.
+3. Inspect the current Spartan project state. When available, use the official `spartan` skill and its read-only project inspection command (`@spartan-ng/cli:info --json`) rather than guessing installed components, versions, paths, or APIs.
+4. Prefer an existing application component when it already expresses the application-level responsibility.
+5. Otherwise prefer an already-installed Spartan Helm component.
+6. If the required standard primitive exists in Spartan but is not installed, add it through the official Spartan CLI instead of reimplementing it.
+7. Create a new application shared/composed component only when the behavior or visual composition is application-specific and likely to recur.
+8. Keep markup local to a feature only when it is genuinely one-off composition.
 
 Do not recreate standard UI primitives in feature markup/CSS when Spartan or an existing shared component provides them. This includes buttons, inputs, textareas, cards, badges, dialogs, drawers/sheets, dropdowns, selects, tabs, accordions, tooltips, popovers, menus, tables, pagination, form controls, and equivalent primitives.
 
@@ -47,18 +50,22 @@ The official MCP server is `@spartan-ng/mcp`; agent-specific MCP configuration i
 
 ## Project setup
 
-Do not reinstall or reinitialize an already-configured project. When setting up Spartan for the first time, follow the official CLI workflow appropriate to the workspace.
+Run setup commands from `<frontend-root>`, meaning the Angular application's own workspace/package root.
+
+Do not reinstall or reinitialize an already-configured frontend. When setting up Spartan for the first time, follow the official CLI workflow appropriate to that frontend workspace.
 
 Typical Angular CLI setup:
 
 ```bash
+cd <frontend-root>
 npm install -D @spartan-ng/cli
 ng g @spartan-ng/cli:init
 ```
 
-Typical Nx setup:
+Typical Nx setup when the frontend root is an Nx workspace:
 
 ```bash
+cd <frontend-root>
 npm install -D @spartan-ng/cli
 npx nx g @spartan-ng/cli:init
 ```
@@ -75,7 +82,9 @@ or for Nx:
 npx nx g @spartan-ng/cli:ui <component>
 ```
 
-For machine-readable project inspection use the matching `@spartan-ng/cli:info --json` generator.
+For machine-readable project inspection use the matching `@spartan-ng/cli:info --json` generator from the same frontend root.
+
+Where generated/copied application UI belongs is governed by `$angular-architecture`. Do not create repository-root UI or library directories merely because a generator has a configurable output path.
 
 ## Styling rules
 
@@ -102,6 +111,7 @@ Prefer Spartan Brain primitives for standard interactive behavior so keyboard in
 
 Before considering UI work complete:
 
+- verify all UI work remained under the actual frontend application root;
 - verify existing shared components were reused where appropriate;
 - verify standard primitives use Spartan rather than local reinventions;
 - verify any newly added Spartan component came through the supported CLI/current project convention;
