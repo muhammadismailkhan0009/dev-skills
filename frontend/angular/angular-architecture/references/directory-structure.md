@@ -2,28 +2,41 @@
 
 Use a domain-first, vertical-feature structure. Optimize the filesystem for ownership clarity and low navigation cost.
 
-## Top-level shape
+## Frontend root
+
+First identify the actual frontend application root. All paths in this reference are relative to that directory.
+
+The Angular application's own `src/` tree and its `libs/` tree belong together under the same frontend root. Do not create repository-root `apps/` or `libs/` directories from this architecture unless the repository already defines those as the frontend application's root structure.
+
+Preferred shape:
 
 ```text
-apps/
-└── <app>/
-    └── ...thin application shell...
-
-libs/
-├── <domain>/
-│   ├── features/
-│   │   ├── <feature-a>/
-│   │   └── <feature-b>/
+<frontend-root>/
+├── src/
+│   ├── app/
+│   │   └── ...thin application shell...
+│   ├── main.ts
+│   └── styles.css
+│
+├── libs/
+│   ├── <domain>/
+│   │   ├── features/
+│   │   │   ├── <feature-a>/
+│   │   │   └── <feature-b>/
+│   │   └── shared/
+│   │       ├── components/
+│   │       ├── data-access/
+│   │       └── util/
 │   └── shared/
 │       ├── components/
-│       ├── data-access/
 │       └── util/
-└── shared/
-    ├── components/
-    └── util/
+│
+└── ...Angular/workspace configuration...
 ```
 
-Do not expose repetitive `src/lib` nesting as part of the semantic architecture. Keep project paths as shallow and ownership-oriented as the workspace permits.
+For example, if the repository contains `frontend/` as the Angular application root, use `frontend/libs/...`, not a sibling repository-root `libs/...`.
+
+Do not expose repetitive `src/lib` nesting as part of the semantic architecture. Keep project paths as shallow and ownership-oriented as the frontend workspace permits.
 
 ## Feature ownership
 
@@ -32,7 +45,7 @@ A feature is the vertical slice for one user-facing capability. Everything used 
 Keep the feature's primary screen/container files at the feature root:
 
 ```text
-libs/jobs/features/discovery/
+<frontend-root>/libs/jobs/features/discovery/
 ├── discovery.ts
 ├── discovery.html
 ├── discovery.spec.ts
@@ -94,13 +107,13 @@ Placement follows actual reuse:
 
 ```text
 one feature owns it
-→ <domain>/features/<feature>/...
+→ <frontend-root>/libs/<domain>/features/<feature>/...
 
 multiple features in the same domain use it
-→ <domain>/shared/...
+→ <frontend-root>/libs/<domain>/shared/...
 
 multiple domains genuinely use it
-→ libs/shared/...
+→ <frontend-root>/libs/shared/...
 ```
 
 Move code when ownership changes; do not duplicate it across features.
@@ -110,7 +123,7 @@ Move code when ownership changes; do not duplicate it across features.
 Code shared by multiple features of one domain remains inside that domain:
 
 ```text
-libs/jobs/shared/
+<frontend-root>/libs/jobs/shared/
 ├── components/
 │   └── job-card/
 ├── data-access/
@@ -122,15 +135,15 @@ Domain-shared components may speak domain vocabulary such as `Job`, `Salary`, or
 
 ## Global shared
 
-`libs/shared/` is only for genuinely domain-neutral code:
+`<frontend-root>/libs/shared/` is only for genuinely domain-neutral code:
 
 ```text
-libs/shared/
+<frontend-root>/libs/shared/
 ├── components/
 └── util/
 ```
 
-Use `shared/components/` for generic application UI/design-system components, including Spartan-derived primitives owned by the application. Use `$angular-ui` for their reuse/styling policy.
+Use `libs/shared/components/` for generic application UI/design-system components, including Spartan-derived primitives owned by the application. Use `$angular-ui` for their reuse/styling policy.
 
 Do not create global `models/`, `services/`, `stores/`, or catch-all `common/` directories. Keep types and services with the behavior/contract that owns them.
 
@@ -139,7 +152,7 @@ Do not create global `models/`, `services/`, `stores/`, or catch-all `common/` d
 Start with the minimum real structure. A small feature may contain only:
 
 ```text
-features/detail/
+<frontend-root>/libs/<domain>/features/detail/
 ├── detail.ts
 ├── detail.html
 └── detail.spec.ts
