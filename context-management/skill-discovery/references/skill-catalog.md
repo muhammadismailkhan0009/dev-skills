@@ -26,6 +26,20 @@ Build Angular screens and shared UI through composition using Tailwind CSS v4 an
 References:
 - `spartan-ui.md` — mandatory reuse order, Spartan skill/MCP/CLI discovery, Tailwind styling policy, component boundaries, and completion checks.
 
+## $nextjs-architecture
+Structure Next.js App Router frontends by business domain and vertical feature ownership. Keep `src/app/` as a thin routing/composition boundary, place feature slices under the frontend root's `libs/`, and preserve explicit Server/Client Component boundaries.
+
+References:
+- `directory-structure.md` — frontend-root layout, thin App Router route files, feature-root files, `components/`, `data-access/`, `util/`, and promotion to domain/global shared.
+- `dependency-boundaries.md` — app/feature/domain-shared/global-shared dependency direction, feature isolation, cross-domain contracts, type ownership, and server/client dependency constraints.
+- `server-client-boundaries.md` — Server Components by default, minimal `'use client'` boundaries, data fetching, Server Actions, Route Handlers, server-only concerns, and version-matched Next.js runtime/docs guidance.
+
+## $nextjs-ui
+Build Next.js/React screens and shared UI through composition using Tailwind CSS v4 and shadcn/ui. Reuse existing application components first, then installed or newly added shadcn components; keep client boundaries small and avoid handcrafted standard primitives.
+
+References:
+- `shadcn-ui.md` — mandatory reuse order, `components.json` ownership, official shadcn skill/MCP/CLI/docs workflow, Tailwind styling policy, component placement, server/client UI boundaries, and completion checks.
+
 ## $mapstruct
 Compile-time Java structural mappings among domain models, persistence entities, commands, and DTOs. Use for mapping configuration and deterministic conversion only; not business logic or external calls.
 
