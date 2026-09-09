@@ -1,6 +1,6 @@
 # Next.js Directory Structure
 
-Use a domain-first, vertical-feature structure. Optimize the filesystem for ownership clarity and low navigation cost.
+Use a domain-first, vertical-feature structure. Optimize the filesystem for ownership clarity, low navigation cost, and small understandable source files.
 
 ## Frontend root
 
@@ -77,18 +77,109 @@ Keep the feature's primary composition component at the feature root:
 
 Do not add another `discovery/` directory around the main feature files.
 
-### `components/`
+## Small file-based units
 
-Use for secondary React components owned only by the feature:
+Prefer file-oriented decomposition similar to a well-structured Java codebase: each source file should expose one primary responsibility that can be understood in isolation.
+
+Default bias:
+
+- one meaningful React component per file;
+- one cohesive pure/helper responsibility per utility file;
+- one clear API/state/mapping responsibility per data-access file;
+- keep the feature root component focused on composition and top-level feature coordination;
+- keep tiny, tightly coupled helpers or trivial leaf components local only when splitting them would reduce rather than improve readability.
+
+Do **not** use file length alone as an architectural metric. Split when a file forces the reader to understand several independent responsibilities at once.
+
+Strong split signals include:
+
+- several non-trivial React components in one `.tsx` file;
+- a feature root mixing page composition, filtering, mapping, formatting, API calls, and multiple UI regions;
+- multiple named UI regions that can be understood independently;
+- pure utilities buried among JSX;
+- data access or mapping logic mixed into presentation code;
+- needing extensive scrolling to locate or understand one component;
+- changing one responsibility requires navigating through unrelated implementation in the same file.
+
+A good decomposition for a feature with a toolbar, catalog, pagination, side rail, API, and formatting logic is:
+
+```text
+<frontend-root>/libs/jobs/features/discovery/
+├── discovery.tsx
+├── discovery.test.tsx
+├── components/
+│   ├── discovery-toolbar.tsx
+│   ├── job-catalog.tsx
+│   ├── catalog-pagination.tsx
+│   └── private-mcp-rail.tsx
+├── data-access/
+│   ├── discovery-api.client.ts
+│   └── discovery.models.ts
+└── util/
+    ├── relative-date.ts
+    └── filter-jobs.ts
+```
+
+The feature root should read mainly as composition:
+
+```text
+discovery.tsx
+├── DiscoveryToolbar
+├── JobCatalog
+├── CatalogPagination
+└── PrivateMcpRail
+```
+
+rather than containing the full implementation of every child component and helper beneath the main component.
+
+### Avoid directory-per-file ceremony
+
+Small files do not require deep directory nesting.
+
+Prefer:
 
 ```text
 components/
-├── filters/
-│   ├── filters.tsx
-│   └── filters.test.tsx
+├── discovery-toolbar.tsx
+├── job-catalog.tsx
+└── catalog-pagination.tsx
+```
+
+instead of automatically creating:
+
+```text
+components/
+├── discovery-toolbar/
+│   └── discovery-toolbar.tsx
+├── job-catalog/
+│   └── job-catalog.tsx
+└── catalog-pagination/
+    └── catalog-pagination.tsx
+```
+
+Create a component subdirectory only when that component itself owns supporting files such as tests, child components, styles, fixtures, or utilities and the grouping reduces navigation cost.
+
+### `components/`
+
+Use for secondary React components owned only by the feature.
+
+Default to direct files:
+
+```text
+components/
+├── filters.tsx
+├── result-list.tsx
+└── result-row.tsx
+```
+
+If one component grows into its own small subsystem, then group it:
+
+```text
+components/
 └── result-list/
     ├── result-list.tsx
-    └── result-list.test.tsx
+    ├── result-list.test.tsx
+    └── result-row.tsx
 ```
 
 Keep a component feature-local until another feature actually needs the same application-level responsibility.
@@ -120,6 +211,17 @@ Use `.server.*` / `.client.*` suffixes when they materially clarify the runtime 
 
 Use only for pure helpers owned by the feature. Do not create the directory until needed. Keep React components, HTTP orchestration, server secrets, and stateful services out of it.
 
+Prefer focused files with names that reveal the operation:
+
+```text
+util/
+├── relative-date.ts
+├── filter-jobs.ts
+└── paginate-jobs.ts
+```
+
+Do not create a generic `utils.ts` that accumulates unrelated helpers.
+
 ## Promotion to shared
 
 Placement follows actual reuse:
@@ -142,7 +244,7 @@ Move code when ownership changes; do not duplicate it across features.
 ```text
 <frontend-root>/libs/jobs/shared/
 ├── components/
-│   └── job-card/
+│   └── job-card.tsx
 ├── data-access/
 │   └── jobs-api.server.ts
 └── util/
@@ -175,4 +277,6 @@ Start with the minimum real structure. A small feature may contain only:
 └── detail.test.tsx
 ```
 
-Add subdirectories only when the feature actually gains those concerns. Architecture must reduce navigation ambiguity, not manufacture folder depth.
+As the feature grows, prefer adding focused files under `components/`, `data-access/`, or `util/` rather than allowing the original file to become a catch-all implementation unit.
+
+Add subdirectories only when the feature actually gains those concerns. Architecture must reduce navigation ambiguity and per-file cognitive load, not manufacture folder depth.
