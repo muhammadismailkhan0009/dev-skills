@@ -22,8 +22,8 @@ When approved behavior fits:
 
 ```text
 Feasibility: confirmed
-Affected layers: domain, service, JPA, API
-Relevant existing flow: VocabularyCandidateExtraction
+Affected layers: [configured flow layers]
+Relevant existing flow: [existing flow or none]
 Material conflict: none
 ```
 
