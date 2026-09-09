@@ -22,3 +22,5 @@ Do not create empty architectural directories in advance. Add `components/`, `da
 Use version-matched Next.js documentation when framework behavior matters. Prefer the docs bundled with the installed `next` package and Next.js runtime tooling over remembered APIs. When available, use the official Next.js MCP/dev-loop tooling for runtime verification rather than guessing from source alone.
 
 When UI primitives or styling are involved, also use `$nextjs-ui`; architecture decides ownership and placement, while `$nextjs-ui` decides component reuse and shadcn/Tailwind rules.
+
+When client interaction has meaningful orchestration—multiple phases, branching transitions, async retry/error/success sequencing, shared journey state, or coordination between independent flows—also use `$uiflow`. Do not select `$uiflow` for ordinary local component state or simple handlers where plain React/Next.js is clearer.
