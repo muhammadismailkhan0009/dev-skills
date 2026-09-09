@@ -40,6 +40,15 @@ Build Next.js/React screens and shared UI through composition using Tailwind CSS
 References:
 - `shadcn-ui.md` — mandatory reuse order, `components.json` ownership, official shadcn skill/MCP/CLI/docs workflow, Tailwind styling policy, component placement, server/client UI boundaries, and completion checks.
 
+## $uiflow
+Use `@myriadcodelabs/uiflow` for React/Next.js interactions that have meaningful orchestration: multiple UI phases, branching transitions, async retry/error/success sequencing, shared journey state, or coordination between independent flows. Do not use it for ordinary local component state, simple forms/handlers, or server-rendered content where plain React/Next.js is clearer.
+
+References:
+- `core-api-and-runtime.md` — `defineFlow`, `FlowRunner`, domain/internal state, UI/action steps, action rendering, channels, transition behavior, and runtime caveats.
+- `flow-design.md` — applicability decision, cohesive flow boundaries, parent/child composition, output/action discipline, state ownership, channels, render discipline, and simplicity rules.
+- `nextjs-integration.md` — App Router client boundary, server-provided initial data, UIFlow action steps versus Next.js Server Actions, data fetching, errors, and channels.
+- `testing.md` — user-level flow behavior, action rendering, channels, state ownership, and avoiding redundant library-contract tests in consumers.
+
 ## $mapstruct
 Compile-time Java structural mappings among domain models, persistence entities, commands, and DTOs. Use for mapping configuration and deterministic conversion only; not business logic or external calls.
 
