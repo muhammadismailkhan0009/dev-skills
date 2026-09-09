@@ -2,12 +2,12 @@
 
 Run after every affected layer is approved. Compare frozen baseline against observable implementation and scenario evidence.
 
-Use behavior, not class, as review unit.
+Use behavior, not implementation shape, as review unit.
 
 ```text
 Behavior: B4
 Approved: Exclude known vocabulary
-Implementation: Domain eligibility policy
+Implementation: [owning implementation responsibility]
 Evidence: Known-vocabulary exclusion scenario
 Status: complete
 ```
@@ -19,7 +19,7 @@ Every behavior gets one status:
 - `drift`: implementation adds or changes observable behavior
 - `blocked`: evidence cannot be established
 
-Class name, package, mapper choice, query strategy, refactor, or other internal detail is not drift unless it changes observable behavior or approved assumption.
+Component, function, class, file, package, query strategy, mapping choice, refactor, or other internal detail is not drift unless it changes observable behavior or an approved assumption.
 
 ## Drift decisions
 
