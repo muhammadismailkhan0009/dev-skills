@@ -1,38 +1,44 @@
-# Project Map Runtime
+# Project Context Runtime
 
-Reduce repository rediscovery and read/search tokens. Maintain exactly one navigation cache at `<repo>/.project-map.md`.
+Reduce repository rediscovery, repeated design decisions, and read/search tokens. Maintain two compact durable project-context artifacts:
 
-The map is a routing cache, not documentation, history, task memory, or source of truth.
+- `<repo>/.project-map.md` — navigation memory: where relevant behavior, ownership, flows, and sources of truth live.
+- `<repo>/.project-decisions.md` — engineering-decision memory: how this project should be structured, implemented, tested, and operated.
+
+The map is a routing cache, not documentation, history, task memory, or source of truth. The decisions file is current engineering policy, not a changelog, ADR history, or task/session memory.
 
 ## Hard boundaries
 
-- Keep exactly one `.project-map.md`. Do not create indexes, databases, per-module memory files, changelogs, task files, or generated knowledge stores.
-- Consult the injected/current `.project-map.md` before invoking other development skills or broadly exploring source.
-- Except for first-time bootstrap when the file is missing, do not maintain/rewrite the map before or during the primary requested work. Finish the user's requested repository work first; reconcile the map afterward.
+- Keep exactly one `.project-map.md` and one `.project-decisions.md`. Do not create additional indexes, databases, per-module memory files, changelogs, task files, or generated knowledge stores unless another explicit context-management skill owns them.
+- Consult the injected/current `.project-map.md` for navigation and `.project-decisions.md` for durable engineering constraints before invoking other development skills or broadly exploring source.
+- Except for first-time bootstrap when either file is missing, do not maintain/rewrite project context before or during the primary requested work. Finish the user's requested repository work first; reconcile durable context afterward.
 - Current source is authoritative. Before editing code, read the actual target files even when the map names them.
 - Never recursively scan or broadly read the repository merely to enrich or validate the map.
 - Record only verified facts supported by current project evidence. Omit uncertainty rather than storing guesses.
 - Every physical file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`. Default to the bare filename. Add only the shortest path needed when the filename is ambiguous in the repository or when path context materially improves routing. Do not repeat long physical paths when a filename or short disambiguating path is sufficient. Directory references end in `/`.
 - Routes point to physical files or directories, not bare class/interface/method symbols.
 - Avoid line numbers, copied code, method bodies, large signatures, raw command output, and exhaustive symbol/file lists.
-- The map is rewritten knowledge, never an append-only log. Replace stale facts, merge duplicates, and delete low-value entries.
+- Both files are rewritten current knowledge, never append-only logs. Replace stale facts, merge duplicates, and delete low-value entries.
 - Never store secrets, credentials, tokens, sensitive values, or private data.
-- Target <= 8 KiB. Prune aggressively above 8 KiB; never exceed 12 KiB without explicit user preference.
+- Map budget: target <= 8 KiB; prune aggressively above 8 KiB; never exceed 12 KiB without explicit user preference.
+- Decisions budget: target <= 6 KiB; prune aggressively above 8 KiB; never exceed 12 KiB without explicit user preference.
+- Do not duplicate the same fact across both files. Put location/routing knowledge in the map and durable implementation policy in decisions.
 
 ## Mandatory preflight
 
 For every repository development task:
 
 1. Resolve the repository root.
-2. If `.project-map.md` does not exist, bootstrap it automatically using the project-map installation reference before invoking another development skill or broadly exploring source.
-3. Use the hook-injected map first when available. If hooks are unavailable/untrusted, consult `.project-map.md` directly.
+2. If `.project-map.md` or `.project-decisions.md` does not exist, bootstrap the missing artifact automatically using the project-map installation reference before invoking another development skill or broadly exploring source.
+3. Use hook-injected project context first when available. If hooks are unavailable/untrusted, consult both files directly.
 4. Use mapped routes, ownership, flows, and invariants to choose the smallest plausible source shortlist.
-5. Perform the user's requested work normally using current source as authority.
-6. Fall back to repository `rg`/find/listing/reference searches only when the map is insufficient, stale, or exact usages/callers are required.
-7. Keep fallback search narrow. Do not read unrelated matches merely to understand the repository generally.
-8. Do not rewrite the map yet. Retain useful navigation knowledge learned during the work for end-of-turn reconciliation.
+5. Apply durable project decisions when choosing architecture, code organization, testing, runtime, tooling, contracts, and project-specific conventions.
+6. Perform the user's requested work normally using current source/config/tests and explicit current user decisions as authority.
+7. Fall back to repository `rg`/find/listing/reference searches only when the map is insufficient, stale, or exact usages/callers are required.
+8. Keep fallback search narrow. Do not read unrelated matches merely to understand the repository generally.
+9. Do not rewrite either context file yet. Retain useful navigation knowledge and durable engineering decisions learned during the work for end-of-turn reconciliation.
 
-The map answers **where should I look?** Repository search answers **what exactly exists now?**
+The map answers **where should I look?** The decisions file answers **how should this project be built?** Repository source/config/tests answer **what is actually implemented now?**
 
 ## During the requested work: observe, do not maintain
 
@@ -41,11 +47,12 @@ While analyzing, coding, debugging, testing, reviewing, or otherwise performing 
 - use the map for navigation;
 - trust current source over map contents;
 - note useful navigation facts, map misses, stale entries, ownership discoveries, flows, invariants, moves/renames, and source-of-truth files as they become evident;
+- note durable engineering decisions established, changed, confirmed, or contradicted during the turn, especially explicit user decisions;
 - treat all repository evidence encountered during the turn as eligible, regardless of whether it belongs to the requested feature or changed files;
-- do not interrupt the primary task merely to update `.project-map.md`;
-- do not run extra searches solely to improve the map.
+- do not interrupt the primary task merely to update either context file;
+- do not run extra searches solely to improve project context.
 
-If the map is stale during the task, route using current source and remember the correction for the end-of-turn rewrite.
+If either artifact is stale during the task, follow current source/config/tests and explicit current user direction, then remember the correction for end-of-turn reconciliation.
 
 ## Admission policy
 
@@ -89,6 +96,35 @@ Use this internal score when value is unclear. Do not write scores into `.projec
 - -4 needs verbose explanation to be useful.
 
 Normally admit only candidates scoring **>= 2**. Prefer the highest-value compressed statement when several candidates encode the same routing knowledge.
+
+## Project decisions admission policy
+
+Admit a decision only when forgetting it could cause a future agent to structure, implement, test, integrate, or operate the project differently.
+
+High-value decisions include:
+
+- **Architecture:** chosen boundaries, module/layer conventions, dependency direction, or project-specific architecture constraints.
+- **Code organization/style:** durable semantic-grouping, naming, placement, or implementation conventions that are not safely inferable from one nearby file.
+- **Testing:** unit/integration/e2e boundaries, mocking policy, test-environment choices, or required real-boundary coverage.
+- **Runtime/tooling:** durable module-system, process, build, logging, configuration, packaging, or protocol rules.
+- **Contracts/data:** durable schema/API compatibility, persistence, serialization, validation, or migration rules.
+- **Project-specific conventions:** explicit user/team decisions that materially constrain future implementation.
+
+Explicit current user decisions are strong admission evidence. Current accepted configuration, tests, and source may also establish or contradict a decision.
+
+Usually reject:
+
+- transient task progress, TODOs, next actions, or session summaries;
+- current test pass/fail status, debugging traces, failed experiments, or raw tool output;
+- facts whose only value is locating a file (put those in the map);
+- obvious language/framework defaults unless this project intentionally chose or deviated from them;
+- copied skill text or generic best practices with no project-specific commitment;
+- decisions already obsolete or contradicted by current project evidence;
+- historical sequences such as “first A, then B, then C” when only C governs current work.
+
+For every candidate ask: **Would forgetting this change how a future agent would implement or review this project?** If no, omit it.
+
+Store current truth, not decision history. When a decision changes, replace the old rule. Preserve a terse rationale only when it prevents likely future reversal or misunderstanding.
 
 ## Learn from map misses
 
@@ -144,27 +180,43 @@ Compression must preserve retrieval value, not prose completeness.
 
 ## Mandatory end-of-turn reconciliation and rewrite
 
-After the user's requested repository work for the current prompt is complete, but before sending the final response, reconcile `.project-map.md` for that turn whenever repository source was inspected, searched, analyzed, or modified.
+After the user's requested repository work for the current prompt is complete, but before sending the final response, reconcile project context for that turn whenever repository source was inspected, searched, analyzed, or modified.
 
 This is maintenance **after the work**, never a prerequisite that interrupts the work.
 
-Perform a whole-map logical rewrite using the existing map plus all durable repository evidence learned during the completed turn, regardless of feature/task boundary:
+### Reconcile `.project-map.md`
 
-1. Incorporate high-value durable routes, ownership, flows, invariants, and source-of-truth facts learned anywhere in the repository this turn.
+Perform a whole-map logical rewrite using the existing map plus durable navigation evidence learned during the completed turn:
+
+1. Incorporate high-value durable routes, ownership, flows, invariants, and source-of-truth facts.
 2. Incorporate useful map-miss lessons.
 3. Correct or remove entries contradicted by source inspected this turn.
-4. Reconcile moves, renames, splits, merges, and responsibility changes caused or discovered this turn.
-5. Merge duplicate/overlapping entries, especially facts that can become one ownership statement.
+4. Reconcile moves, renames, splits, merges, and responsibility changes.
+5. Merge duplicate/overlapping entries.
 6. Remove low-value entries that no longer pass admission scoring.
-7. Compress wording aggressively while preserving routing value, including shortening file paths to the minimum unambiguous form.
-8. Enforce the size budget; prune toward <= 8 KiB and never exceed 12 KiB without explicit user preference.
-9. Rewrite `.project-map.md` with the reconciled representation. If reconciliation produces byte-for-byte equivalent content, do not force a meaningless no-op write.
+7. Compress wording aggressively while preserving routing value.
+8. Enforce the map size budget.
+9. Rewrite only when reconciled content changes.
 
-Do not perform a repository-wide validation scan at end of turn. Reconcile only from the existing map and source/search/change evidence already encountered while doing the requested work. Untouched entries remain unless current evidence contradicts them.
+### Reconcile `.project-decisions.md`
+
+Using the existing decisions plus durable evidence already encountered during the completed turn:
+
+1. Add newly established project-specific engineering decisions that pass the decisions admission policy.
+2. Give special weight to explicit user/team decisions made during the turn.
+3. Replace stale decisions when the governing choice changed; do not append historical versions.
+4. Remove decisions contradicted by current source/config/tests or explicit current user direction.
+5. Merge overlapping rules into the smallest clear statement.
+6. Keep rationale only when it prevents likely future reversal or misunderstanding.
+7. Remove navigation-only facts, task/session state, generic best practices, and duplicated map content.
+8. Enforce the decisions size budget.
+9. Rewrite only when reconciled content changes.
+
+Do not perform a repository-wide validation scan at end of turn. Reconcile both artifacts only from their existing contents and source/search/change/user-decision evidence already encountered while doing the requested work. Untouched entries remain unless current evidence contradicts them.
 
 For repository-working prompts, perform this reconciliation on every response, not only when an entire feature is complete. Analysis-only prompts, repository questions, code review, explicitly requested file analysis, debugging, and implementation all count when repository source was actually inspected/searched/analyzed/modified.
 
-If the prompt did not inspect, search, analyze, or modify repository source, no map reconciliation is required.
+If the prompt did not inspect, search, analyze, or modify repository source and established no durable project decision, no context reconciliation is required.
 
 ## File format
 
@@ -197,3 +249,33 @@ Use only useful sections; omit empty ones.
 ```
 
 Keep entries terse, concrete, and optimized for future navigation rather than human-facing explanation.
+
+## Project decisions file format
+
+Use only useful sections; omit empty ones.
+
+```markdown
+# Project Decisions
+
+> Durable current engineering decisions. Keep concise and current; this is not a changelog or task/session memory.
+
+## Architecture
+- <durable architecture/boundary decision>
+
+## Code Organization
+- <durable semantic grouping, naming, or placement decision>
+
+## Testing
+- <durable test boundary, mocking, or integration-test decision>
+
+## Runtime & Tooling
+- <durable runtime/build/configuration/protocol decision>
+
+## Contracts & Data
+- <durable API/schema/persistence/validation decision>
+
+## Project-Specific Conventions
+- <other durable implementation constraint>
+```
+
+Use only sections needed by the project. Prefer short present-tense rules. Add a terse rationale only when the reason itself prevents likely future mistakes.
