@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 MAP_NAME = ".project-map.md"
+DECISIONS_NAME = ".project-decisions.md"
 RUNTIME_NAME = "project_map_runtime.md"
 STATE_DIR_NAME = "codex-project-map-hook"
 
@@ -57,17 +58,19 @@ def read_text(path):
 def user_prompt_submit(data, root):
     runtime_path = root / ".codex" / "hooks" / RUNTIME_NAME
     map_path = root / MAP_NAME
+    decisions_path = root / DECISIONS_NAME
 
     runtime = read_text(runtime_path)
     project_map = read_text(map_path)
+    project_decisions = read_text(decisions_path)
 
     parts = []
     if runtime:
-        parts.append("PROJECT MAP RUNTIME (hook-enforced)\n" + runtime)
+        parts.append("PROJECT CONTEXT RUNTIME (hook-enforced)\n" + runtime)
     else:
         parts.append(
-            "PROJECT MAP RUNTIME MISSING\n"
-            "The installed project-map runtime reference is missing or unreadable. Use the installed $project-map skill and its installation reference to repair project-map infrastructure before broad repository exploration."
+            "PROJECT CONTEXT RUNTIME MISSING\n"
+            "The installed project-map runtime reference is missing or unreadable. Use the installed $project-map skill and its installation reference to repair project-context infrastructure before broad repository exploration."
         )
 
     if project_map is not None:
@@ -76,6 +79,14 @@ def user_prompt_submit(data, root):
         parts.append(
             "CURRENT PROJECT MAP MISSING\n"
             "No .project-map.md exists at the repository root. Bootstrap it sparsely using the installed $project-map installation reference before broad repository exploration."
+        )
+
+    if project_decisions is not None:
+        parts.append("CURRENT PROJECT DECISIONS\n" + project_decisions)
+    else:
+        parts.append(
+            "CURRENT PROJECT DECISIONS MISSING\n"
+            "No .project-decisions.md exists at the repository root. Bootstrap the minimal decisions file using the installed $project-map installation reference before broad repository exploration."
         )
 
     emit(
@@ -117,7 +128,7 @@ def stop(data, root):
         {
             "decision": "block",
             "reason": (
-                "The primary requested work is complete. Before returning the final response, perform the mandatory project-map end-of-turn reconciliation now using the injected PROJECT MAP RUNTIME rules and all durable repository knowledge learned this turn. Do not perform extra repository exploration solely for the map. Rewrite .project-map.md only if its reconciled content changes, then return the user's final response."
+                "The primary requested work is complete. Before returning the final response, perform the mandatory project-context end-of-turn reconciliation now using the injected PROJECT CONTEXT RUNTIME rules and all durable repository knowledge and engineering decisions learned this turn. Do not perform extra repository exploration solely for context maintenance. Reconcile .project-map.md and .project-decisions.md independently, rewriting either only if its content changes, then return the user's final response."
             ),
         }
     )
