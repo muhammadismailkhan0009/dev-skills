@@ -1,78 +1,67 @@
 # Modules and Files
 
-Optimize the filesystem for direct navigation and low reconstruction cost.
+Apply `$semantic-organization` for grouping and splitting decisions. This reference covers TypeScript-specific module/file conventions.
 
-## File granularity
+## Semantic modules
 
-Prefer one primary responsibility per source file.
+A TypeScript file or module may expose multiple functions, types, or methods when they belong to one coherent concept.
 
-Good defaults:
-- one meaningful class, component, adapter, use case, or contract per file;
-- one cohesive family of tiny pure helpers per file when they are inseparable;
-- filenames should reveal the concept or operation they contain;
-- split a file when understanding one responsibility requires reading unrelated logic.
-
-Prefer:
+For example, a registry may naturally expose:
 
 ```text
-application/
-├── install-skill.ts
-├── remove-skill.ts
-└── list-skills.ts
+register
+unregister
+find
+list
+refresh
 ```
 
-over:
+from one `skill-registry.ts` module or class.
 
-```text
-application/
-└── skill-service.ts
-```
-
-when the service file would contain several independently understandable operations.
-
-Do not split mechanically by line count. Tiny, tightly coupled details can remain local when extracting them would increase navigation cost.
-
-## Avoid directory-per-file ceremony
-
-Prefer:
-
-```text
-mcp/
-├── list-skills-tool.ts
-├── install-skill-tool.ts
-└── remove-skill-tool.ts
-```
-
-instead of creating one directory around every file.
-
-Create a subdirectory when a concept owns multiple supporting files such as tests, fixtures, child components, mappings, or protocol-specific helpers.
+Do not split each operation into a separate file merely to reduce file size. Split when semantic ownership diverges or a concept grows into independently meaningful sub-concepts.
 
 ## Naming
 
-Use names that describe domain or application intent:
+Use names that reveal the concept or capability:
 
 ```text
-install-skill.ts
-skill-store.ts
+skill-registry.ts
+repository-source.ts
 filesystem-skill-store.ts
-github-skill-source.ts
-install-skill-tool.ts
+mcp-server.ts
+repository-url.ts
 ```
 
-Avoid vague buckets and names such as:
+Avoid vague buckets such as:
 
 ```text
-manager.ts
-service.ts
 helper.ts
 common.ts
 utils.ts
 misc.ts
+general-service.ts
 ```
 
-unless the qualifier makes the responsibility precise.
+unless the qualifier genuinely describes one coherent semantic unit.
 
 Use the project's naming convention consistently. In file-based Node projects, kebab-case filenames are preferred when no stronger existing convention exists.
+
+## Classes and function modules
+
+Use whichever representation makes the semantic owner clearest.
+
+A class is natural when a concept owns state, dependencies, identity, or lifecycle.
+
+A cohesive module of functions is natural for stateless behavior such as:
+
+```text
+repository-url.ts
+├── parse
+├── normalize
+└── isSupported
+```
+
+Do not introduce classes solely to imitate Java syntax, and do not avoid classes merely because equivalent functions are possible.
 
 ## Imports and exports
 
@@ -87,7 +76,7 @@ Prefer explicit module boundaries.
 
 ## Ownership beats syntax category
 
-Do not create repository-wide buckets for TypeScript syntax:
+Do not create repository-wide buckets merely for TypeScript syntax:
 
 ```text
 src/
@@ -97,21 +86,6 @@ src/
 └── utils/
 ```
 
-Instead keep definitions with their owner:
-
-```text
-domain/
-├── skill.ts
-└── skill-source.ts
-
-application/
-├── install-skill.ts
-└── ports/
-    └── skill-store.ts
-
-infrastructure/
-└── mcp/
-    └── install-skill-input.ts
-```
+Instead keep definitions with the concept, capability, contract, or architectural boundary that owns them.
 
 Promote code outward only after ownership genuinely becomes shared.
