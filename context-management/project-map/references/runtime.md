@@ -12,9 +12,9 @@ The map is a routing cache, not documentation, history, task memory, or source o
 - Keep exactly one `.project-map.md` and one `.project-decisions.md`. Do not create additional indexes, databases, per-module memory files, changelogs, task files, or generated knowledge stores unless another explicit context-management skill owns them.
 - Consult the injected/current `.project-map.md` for navigation and `.project-decisions.md` for durable engineering constraints before invoking other development skills or broadly exploring source.
 - Except for first-time bootstrap when either file is missing, do not maintain/rewrite project context before or during the primary requested work. Finish the user's requested repository work first; reconcile durable context afterward.
-- Current source is authoritative. Before editing code, read the actual target files even when the map names them.
-- Never recursively scan or broadly read the repository merely to enrich or validate the map.
-- Record only verified facts supported by current project evidence. Omit uncertainty rather than storing guesses.
+- Current source/config/tests are authoritative for what is actually implemented; explicit current user/team decisions are authoritative for intended engineering policy. Before editing code, read the actual target files even when the map names them.
+- Never recursively scan or broadly read the repository merely to enrich or validate project context.
+- Map entries require verified current project evidence. Decision entries require an explicit current user/team decision or accepted current project evidence. Omit uncertainty rather than storing guesses.
 - Every physical file reference must include its filename extension, e.g. `AuthenticationService.java`, `package.json`, `routes.ts`. Default to the bare filename. Add only the shortest path needed when the filename is ambiguous in the repository or when path context materially improves routing. Do not repeat long physical paths when a filename or short disambiguating path is sufficient. Directory references end in `/`.
 - Routes point to physical files or directories, not bare class/interface/method symbols.
 - Avoid line numbers, copied code, method bodies, large signatures, raw command output, and exhaustive symbol/file lists.
