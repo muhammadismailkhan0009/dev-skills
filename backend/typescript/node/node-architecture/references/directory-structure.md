@@ -1,6 +1,6 @@
 # Node Directory Structure
 
-Choose the smallest structure that makes ownership and dependency direction obvious.
+Choose the smallest structure that makes ownership and dependency direction obvious. Apply `$semantic-organization` within each architectural area.
 
 ## Small application: layer first
 
@@ -32,7 +32,7 @@ Use this for a CLI, MCP server, adapter, worker, daemon, or service with one pri
 
 Create only directories that real code needs.
 
-A small CLI might be only:
+A small CLI might be:
 
 ```text
 src/
@@ -40,11 +40,9 @@ src/
 ├── entrypoints/
 │   └── cli/
 │       ├── cli.ts
-│       ├── install-command.ts
-│       └── list-command.ts
+│       └── skill-command.ts
 ├── application/
-│   ├── install-skill.ts
-│   ├── list-skills.ts
+│   ├── skill-registry.ts
 │   └── ports/
 │       └── skill-store.ts
 ├── domain/
@@ -53,6 +51,8 @@ src/
     └── filesystem/
         └── filesystem-skill-store.ts
 ```
+
+Here `skill-command.ts` may own several related CLI operations, and `skill-registry.ts` may expose several related application operations, as long as each remains semantically cohesive.
 
 ## Process entrypoint vs application entrypoints
 
@@ -66,21 +66,22 @@ Examples:
 entrypoints/
 ├── cli/
 │   ├── cli.ts
-│   └── install-command.ts
+│   └── skill-command.ts
 ├── mcp/
 │   ├── mcp-server.ts
-│   └── install-skill-tool.ts
+│   ├── skill-tools.ts
+│   └── repository-tools.ts
 ├── http/
-│   └── install-skill-handler.ts
+│   └── skill-handler.ts
 ├── events/
-│   └── skill-published-handler.ts
+│   └── skill-events.ts
 ├── scheduled/
-│   └── refresh-registry.ts
+│   └── registry-refresh.ts
 └── workers/
-    └── process-install-job.ts
+    └── install-jobs.ts
 ```
 
-Runtime hosts such as `cli.ts` or `mcp-server.ts` configure/register handlers. Individual commands/tools/handlers are the behavioral entrypoints.
+Runtime hosts such as `cli.ts` or `mcp-server.ts` configure/register handlers. A handler file may group several related operations when they share one semantic owner.
 
 ## Larger application: module first
 
@@ -111,44 +112,36 @@ Use module-first when global layer directories would force a developer to scan u
 
 Do not create modules merely because several folders exist. A module should represent a coherent business/capability boundary.
 
-## File granularity
+## Semantic grouping inside layers
 
-Use small file-based units.
+Architectural layers answer where a responsibility belongs. Semantic organization answers how related implementation inside that boundary should be grouped.
 
-Prefer:
+For example:
 
 ```text
 entrypoints/mcp/
 ├── mcp-server.ts
-├── list-skills-tool.ts
-├── install-skill-tool.ts
-└── remove-skill-tool.ts
-```
+├── skill-tools.ts
+└── repository-tools.ts
 
-instead of a large `mcp-tools.ts` containing every tool.
-
-Prefer:
-
-```text
 application/
-├── install-skill.ts
-├── remove-skill.ts
-└── list-skills.ts
+├── skill-registry.ts
+└── repository-source.ts
 ```
 
-instead of an all-purpose `skill-service.ts`.
+A file/class/module may contain several related operations. Do not create `install-skill.ts`, `remove-skill.ts`, `list-skills.ts`, and `refresh-skills.ts` by default when one cohesive `SkillRegistry` concept naturally owns them.
 
-Do not introduce a directory per file. Group only when a concept owns multiple supporting files.
+Split only when semantic ownership diverges or one concept develops meaningful sub-concepts. File length or function count alone is not a split criterion.
 
 ## Shared code
 
 Keep code local until it is actually reused.
 
 ```text
-one operation/capability owns it
+one concept/capability owns it
 → keep local
 
-multiple operations in one module use it
+multiple concepts in one module use it
 → module-local shared code
 
 multiple modules genuinely use it
