@@ -1,6 +1,6 @@
-# Project Map Installation and Repair
+# Project Context Installation and Repair
 
-Use this reference only when bootstrapping, installing, upgrading, or repairing project-map infrastructure in a repository. Normal repository turns should use the installed runtime reference injected by the project hook instead of re-reading this file.
+Use this reference only when bootstrapping, installing, upgrading, or repairing project-context infrastructure in a repository. Normal repository turns should use the installed runtime reference injected by the project hook instead of re-reading this file.
 
 ## Codex lifecycle hook: primary enforcement
 
@@ -28,8 +28,8 @@ Canonical project-map handlers:
             "type": "command",
             "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/project_map_hook.py\"",
             "timeout": 5,
-            "additionalContextLimit": 8000,
-            "statusMessage": "Loading project map"
+            "additionalContextLimit": 12000,
+            "statusMessage": "Loading project context"
           }
         ]
       }
@@ -63,9 +63,9 @@ Canonical project-map handlers:
 
 The hook lifecycle is:
 
-- `UserPromptSubmit`: inject the installed runtime contract plus current `.project-map.md` into developer context so preflight and memory-maintenance behavior do not depend on the model choosing to read skill files.
+- `UserPromptSubmit`: inject the installed runtime contract plus current `.project-map.md` and `.project-decisions.md` into developer context so preflight and memory-maintenance behavior do not depend on the model choosing to read skill files.
 - `PostToolUse`: mark that repository/local tool activity occurred during the turn. The hook ignores planning/agent-management-only tools.
-- `Stop`: after primary work, force one continuation that applies the runtime end-of-turn reconciliation rules. `stop_hook_active` prevents a reconciliation loop.
+- `Stop`: after primary work, force one continuation that applies the runtime end-of-turn reconciliation rules for both durable context artifacts. `stop_hook_active` prevents a reconciliation loop.
 
 The hook must not reason about or rewrite project knowledge itself. It only guarantees lifecycle/context; the runtime reference owns map-quality rules.
 
@@ -74,17 +74,17 @@ The hook must not reason about or rewrite project knowledge itself. It only guar
 Ensure root `AGENTS.md` contains the following dedicated fallback section. Hooks are stronger and should be used when trusted, but this keeps the lifecycle understandable and provides a fallback when hooks are unavailable:
 
 ```markdown
-## Project Map Preflight
-Use the project-map lifecycle for repository work. Prefer the trusted project-local Codex hooks when available; otherwise consult `$project-map` / `.project-map.md` before broad repository exploration. Current source remains authoritative. Complete the requested repository work before maintaining the map. After repository work is done and before the final response, reconcile and aggressively prune `.project-map.md` from durable navigation knowledge learned across the whole turn.
+## Project Context Preflight
+Use the project-map lifecycle for repository work. Prefer the trusted project-local Codex hooks when available; otherwise consult `$project-map`, `.project-map.md`, and `.project-decisions.md` before broad repository exploration. Use the map for navigation and decisions for durable engineering constraints. Current source/config/tests and explicit current user direction remain authoritative. Complete the requested repository work before maintaining project context. After repository work is done and before the final response, reconcile both files from durable knowledge learned across the whole turn.
 ```
 
-If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. `.project-map.md` remains the sole project knowledge cache.
+If root `AGENTS.md` does not exist, create it with this section. If it exists, add or repair only this dedicated section and preserve all unrelated user/project instructions. Do not duplicate the section. The only project-map-owned durable context artifacts are `.project-map.md` for navigation and `.project-decisions.md` for current engineering decisions.
 
 For non-Codex harnesses, use the equivalent lifecycle mechanism if one exists; otherwise rely on the always-loaded project instruction layer. Do not duplicate project knowledge into those mechanisms.
 
 ## Automatic bootstrap
 
-When `.project-map.md` is absent, initialize it without asking unless the user explicitly forbids repository metadata changes.
+When `.project-map.md` or `.project-decisions.md` is absent, initialize the missing artifact without asking unless the user explicitly forbids repository metadata changes.
 
 Use only cheap evidence already available or cheap to obtain:
 
@@ -93,8 +93,16 @@ Use only cheap evidence already available or cheap to obtain:
 - top-level directories and at most a shallow directory listing;
 - source files that must already be inspected for the current task.
 
-Do not recursively inspect source to make the first map comprehensive. Create a sparse, correct `.project-map.md`, install/repair the Codex project hook, copy the runtime reference, repair the fallback `AGENTS.md` section, continue the requested task, and let subsequent turns enrich the map.
+Do not recursively inspect source to make first-time project context comprehensive. Create a sparse, correct `.project-map.md` and a minimal `.project-decisions.md`, install/repair the Codex project hook, copy the runtime reference, repair the fallback `AGENTS.md` section, continue the requested task, and let subsequent turns enrich both artifacts.
 
-A sparse correct map is better than an expensive complete map.
+Use this minimal decisions bootstrap when no durable project-specific engineering decision is yet known:
 
-Bootstrap is the only map write allowed before the primary requested work because the map must exist to serve as preflight navigation.
+```markdown
+# Project Decisions
+
+> Durable current engineering decisions. Keep concise and current; this is not a changelog or task/session memory.
+```
+
+A sparse correct map and minimal decisions file are better than expensive speculative context.
+
+Bootstrap is the only project-context write allowed before the primary requested work because both artifacts must exist for preflight injection.
