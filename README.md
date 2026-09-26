@@ -4,6 +4,7 @@ This repository contains atomic development skills and installable flows for Cod
 
 ## Repository structure
 
+- `code-organization/`: cross-language code grouping, semantic ownership, and navigability skills
 - `backend/`: backend skills grouped by language and framework
 - `frontend/`: frontend skills
 - `framework-agnostic-languages/`: language skills without framework coupling
